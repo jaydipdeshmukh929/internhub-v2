@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
+
     List<ChatMessage> findByRoomIdOrderBySentAtAsc(String roomId);
 
     @Query("SELECT COUNT(m) FROM ChatMessage m WHERE m.receiverEmail = :email AND m.read = false")

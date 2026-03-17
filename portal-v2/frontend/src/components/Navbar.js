@@ -9,7 +9,7 @@ export default function Navbar() {
   const { dark, toggle }  = useTheme();
   const navigate  = useNavigate();
   const location  = useLocation();
-  const [unread, setUnread]     = useState(0);
+  const [unread, setUnread]         = useState(0);
   const [chatUnread, setChatUnread] = useState(0);
 
   useEffect(() => {
@@ -20,57 +20,51 @@ export default function Navbar() {
   }, [user, location.pathname]);
 
   const logout = () => { signOut(); navigate('/login'); };
-  const active = p => location.pathname === p ? 'nav-link active' : 'nav-link';
+  const a = p => location.pathname === p ? 'nav-link active' : 'nav-link';
 
   if (!user) return null;
 
-  const NotifLink = ({ to, children, count }) => (
-    <Link to={to} className={active(to)} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-      {children}
-      {count > 0 && (
-        <span className="notif-badge">{count > 9 ? '9+' : count}</span>
-      )}
+  const Badge = ({ to, label, count }) => (
+    <Link to={to} className={a(to)} style={{ position:'relative', display:'inline-flex', alignItems:'center' }}>
+      {label}
+      {count > 0 && <span className="notif-badge">{count > 9 ? '9+' : count}</span>}
     </Link>
   );
 
   return (
     <nav className="navbar">
-      <Link to={user.role === 'ADMIN' ? '/admin' : '/dashboard'} className="brand">⚡ InternHub</Link>
+      <Link to={user.role==='ADMIN' ? '/admin' : '/dashboard'} className="brand">⚡ InternHub</Link>
+      <div style={{ display:'flex', alignItems:'center', gap:'2px', flexWrap:'wrap' }}>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexWrap: 'wrap' }}>
         {user.role === 'STUDENT' && (<>
-          <Link to="/dashboard"       className={active('/dashboard')}>Explore</Link>
-          <Link to="/my-applications" className={active('/my-applications')}>Applications</Link>
-          <Link to="/saved"           className={active('/saved')}>Saved</Link>
-          <Link to="/features"        className={active('/features')}>Features</Link>
-          <Link to="/analytics"       className={active('/analytics')}>Analytics</Link>
-          <Link to="/gamification"    className={active('/gamification')}>🏆</Link>
-          <Link to="/announcements"   className={active('/announcements')}>📢</Link>
-          <NotifLink to="/chat"       count={chatUnread}>💬</NotifLink>
-          <Link to="/profile"         className={active('/profile')}>Profile</Link>
-          <NotifLink to="/notifications" count={unread}>🔔</NotifLink>
+          <Link to="/dashboard"       className={a('/dashboard')}>Explore</Link>
+          <Link to="/my-applications" className={a('/my-applications')}>Applications</Link>
+          <Link to="/saved"           className={a('/saved')}>Saved</Link>
+          <Link to="/features"        className={a('/features')}>Features</Link>
+          <Link to="/ai"              className={a('/ai')}>🤖 AI</Link>
+          <Link to="/analytics"       className={a('/analytics')}>Analytics</Link>
+          <Link to="/gamification"    className={a('/gamification')}>🏆</Link>
+          <Link to="/announcements"   className={a('/announcements')}>📢</Link>
+          <Badge to="/chat"           label="💬" count={chatUnread} />
+          <Link to="/profile"         className={a('/profile')}>Profile</Link>
+          <Link to="/security"        className={a('/security')}>🔒</Link>
+          <Badge to="/notifications"  label="🔔" count={unread} />
         </>)}
 
         {user.role === 'ADMIN' && (<>
-          <Link to="/admin"              className={active('/admin')}>Dashboard</Link>
-          <Link to="/admin/internships"  className={active('/admin/internships')}>Internships</Link>
-          <Link to="/admin/applications" className={active('/admin/applications')}>Applications</Link>
-          <Link to="/admin/users"        className={active('/admin/users')}>Users</Link>
-          <Link to="/admin/features"     className={active('/admin/features')}>Features</Link>
-          <Link to="/announcements"      className={active('/announcements')}>📢</Link>
-          <Link to="/qna"                className={active('/qna')}>Q&A</Link>
-          <NotifLink to="/chat"          count={chatUnread}>💬</NotifLink>
+          <Link to="/admin"              className={a('/admin')}>Dashboard</Link>
+          <Link to="/admin/internships"  className={a('/admin/internships')}>Internships</Link>
+          <Link to="/admin/applications" className={a('/admin/applications')}>Applications</Link>
+          <Link to="/admin/users"        className={a('/admin/users')}>Users</Link>
+          <Link to="/admin/features"     className={a('/admin/features')}>Features</Link>
+          <Link to="/announcements"      className={a('/announcements')}>📢</Link>
+          <Badge to="/chat"              label="💬" count={chatUnread} />
         </>)}
 
-        {/* Dark/Light toggle */}
-        <button onClick={toggle} className="nav-link" style={{ fontSize: '1rem', padding: '6px 10px' }}
-          title={dark ? 'Switch to light mode' : 'Switch to dark mode'}>
+        <button onClick={toggle} className="nav-link" style={{ fontSize:'1rem', padding:'6px 10px' }}>
           {dark ? '☀️' : '🌙'}
         </button>
-
-        <span style={{ color: 'var(--text3)', fontSize: '0.78rem', margin: '0 4px' }}>
-          {user.name?.split(' ')[0]}
-        </span>
+        <span style={{ color:'var(--text3)', fontSize:'0.78rem', margin:'0 4px' }}>{user.name?.split(' ')[0]}</span>
         <button className="nav-btn" onClick={logout}>Logout</button>
       </div>
     </nav>

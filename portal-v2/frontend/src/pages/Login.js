@@ -1,144 +1,130 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { login, googleLogin } from '../services/api';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { login, verify2FA } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-
-const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID'; // Replace with your client ID
+import PasswordStrength from '../components/PasswordStrength';
 
 export default function Login() {
   const { signIn } = useAuth();
-  const navigate = useNavigate();
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const navigate   = useNavigate();
+  const [email, setEmail]         = useState('');
+  const [password, setPassword]   = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState('');
+  // 2FA state
+  const [requires2FA, setRequires2FA] = useState(false);
+  const [twoFACode, setTwoFACode]     = useState('');
 
-  // Load Google Sign-In script
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-
-    script.onload = () => {
-      if (window.google && GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID') {
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: handleGoogleResponse,
-        });
-        window.google.accounts.id.renderButton(
-          document.getElementById('google-btn'),
-          {
-            theme: 'filled_black',
-            size: 'large',
-            width: '100%',
-            text: 'continue_with',
-          }
-        );
-      }
-    };
-    return () => { document.body.removeChild(script); };
-  }, []);
-
-  const handleGoogleResponse = async (response) => {
-    setError(''); setLoading(true);
-    try {
-      const res = await googleLogin({ idToken: response.credential });
-      if (res.data.success) {
-        signIn(res.data);
-        navigate(res.data.role === 'ADMIN' ? '/admin' : '/dashboard');
-      } else {
-        setError(res.data.message);
-      }
-    } catch {
-      setError('Google login failed. Please try again.');
-    } finally { setLoading(false); }
+  const getDevice = () => {
+    const ua = navigator.userAgent;
+    if (/mobile/i.test(ua)) return 'Mobile Browser';
+    if (/mac/i.test(ua))    return 'Mac';
+    if (/windows/i.test(ua))return 'Windows PC';
+    return 'Unknown Device';
   };
 
-  const submit = async (e) => {
-    e.preventDefault(); setError(''); setLoading(true);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError(''); setLoading(true);
     try {
-      const res = await login(form);
-      if (res.data.success) {
-        signIn(res.data);
-        navigate(res.data.role === 'ADMIN' ? '/admin' : '/dashboard');
+      const r = await login({ email, password, device: getDevice(), rememberMe });
+      if (r.data.requires2FA) {
+        setRequires2FA(true);
+      } else if (r.data.success) {
+        localStorage.setItem('token', r.data.token);
+        signIn(r.data);
+        navigate(r.data.role === 'ADMIN' ? '/admin' : '/dashboard');
       } else {
-        setError(res.data.message);
+        setError(r.data.message);
       }
-    } catch {
-      setError('Server error — is the backend running on port 8081?');
-    } finally { setLoading(false); }
+    } catch { setError('Login failed. Please try again.'); }
+    finally { setLoading(false); }
+  };
+
+  const handle2FA = async (e) => {
+    e.preventDefault();
+    setError(''); setLoading(true);
+    try {
+      const r = await verify2FA({ email, code: twoFACode });
+      if (r.data.success) {
+        localStorage.setItem('token', r.data.token);
+        signIn(r.data);
+        navigate(r.data.role === 'ADMIN' ? '/admin' : '/dashboard');
+      } else {
+        setError(r.data.message);
+      }
+    } catch { setError('Verification failed.'); }
+    finally { setLoading(false); }
   };
 
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <div className="auth-logo">⚡ InternHub</div>
-        <p className="auth-subtitle">Welcome back — sign in to continue</p>
+        <Link to="/home" className="brand" style={{ display:'block', textAlign:'center', marginBottom:'1.5rem', fontSize:'1.4rem' }}>
+          ⚡ InternHub
+        </Link>
 
-        {error && <div className="alert alert-error">{error}</div>}
-
-        <form onSubmit={submit}>
-          <div className="form-group">
-            <label>Email address</label>
-            <input className="form-control" type="email" value={form.email}
-              onChange={e => setForm({ ...form, email: e.target.value })}
-              required placeholder="you@example.com" />
-          </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input className="form-control" type="password" value={form.password}
-              onChange={e => setForm({ ...form, password: e.target.value })}
-              required placeholder="••••••••" />
-          </div>
-          <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
-            <Link to="/forgot-password" style={{ fontSize: '0.82rem', color: 'var(--accent2)' }}>
-              Forgot password?
-            </Link>
-          </div>
-          <button className="btn btn-primary" type="submit" disabled={loading}
-            style={{ width: '100%', marginBottom: '1rem' }}>
-            {loading ? 'Signing in…' : 'Sign In'}
-          </button>
-        </form>
-
-        {/* Divider */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '0.5rem 0 1rem' }}>
-          <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
-          <span style={{ fontSize: '0.78rem', color: 'var(--text3)' }}>OR</span>
-          <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
-        </div>
-
-        {/* Google Sign-In Button */}
-        {GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID' ? (
-          <div id="google-btn" style={{ width: '100%', marginBottom: '1rem' }} />
+        {!requires2FA ? (
+          <>
+            <h2 style={{ textAlign:'center', marginBottom:'0.5rem' }}>Welcome back</h2>
+            <p style={{ textAlign:'center', color:'var(--text2)', fontSize:'0.88rem', marginBottom:'1.5rem' }}>
+              Don't have an account? <Link to="/register" style={{ color:'var(--accent2)' }}>Register</Link>
+            </p>
+            {error && <div className="alert alert-error">{error}</div>}
+            <form onSubmit={handleLogin}>
+              <div className="form-group">
+                <label>Email</label>
+                <input className="form-control" type="email" placeholder="you@example.com"
+                  value={email} onChange={e => setEmail(e.target.value)} required />
+              </div>
+              <div className="form-group">
+                <label>Password</label>
+                <input className="form-control" type="password" placeholder="Your password"
+                  value={password} onChange={e => setPassword(e.target.value)} required />
+              </div>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.2rem' }}>
+                <label style={{ display:'flex', gap:'8px', alignItems:'center', cursor:'pointer', fontSize:'0.85rem', color:'var(--text2)' }}>
+                  <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)}
+                    style={{ accentColor:'var(--accent)' }} />
+                  Remember me (30 days)
+                </label>
+                <Link to="/forgot-password" style={{ fontSize:'0.82rem', color:'var(--accent2)' }}>
+                  Forgot password?
+                </Link>
+              </div>
+              <button className="btn btn-primary" type="submit" style={{ width:'100%' }} disabled={loading}>
+                {loading ? 'Signing in...' : 'Sign In'}
+              </button>
+            </form>
+          </>
         ) : (
-          <div style={{
-            border: '1px solid var(--border2)', borderRadius: 'var(--radius-sm)',
-            padding: '10px', textAlign: 'center', marginBottom: '1rem',
-            color: 'var(--text2)', fontSize: '0.85rem', background: 'var(--surface2)'
-          }}>
-            <span style={{ marginRight: '8px' }}>🔑</span>
-            Google Sign-In — add your Client ID to enable
-            <div style={{ fontSize: '0.75rem', color: 'var(--text3)', marginTop: '4px' }}>
-              See README for Google Cloud setup steps
+          <>
+            <div style={{ textAlign:'center', marginBottom:'1.5rem' }}>
+              <div style={{ fontSize:'3rem', marginBottom:'10px' }}>🔐</div>
+              <h2 style={{ marginBottom:'6px' }}>2FA Verification</h2>
+              <p style={{ color:'var(--text2)', fontSize:'0.85rem' }}>
+                A 6-digit code has been sent to <strong>{email}</strong>
+              </p>
             </div>
-          </div>
+            {error && <div className="alert alert-error">{error}</div>}
+            <form onSubmit={handle2FA}>
+              <div className="form-group">
+                <label>Enter 6-digit code</label>
+                <input className="form-control" type="text" placeholder="123456" maxLength={6}
+                  value={twoFACode} onChange={e => setTwoFACode(e.target.value.replace(/\D/,''))} required
+                  style={{ fontSize:'1.4rem', letterSpacing:'0.3em', textAlign:'center' }} />
+              </div>
+              <button className="btn btn-primary" type="submit" style={{ width:'100%' }} disabled={loading || twoFACode.length < 6}>
+                {loading ? 'Verifying...' : 'Verify & Login'}
+              </button>
+              <button type="button" className="btn btn-outline" style={{ width:'100%', marginTop:'8px' }}
+                onClick={() => { setRequires2FA(false); setTwoFACode(''); setError(''); }}>
+                ← Back to Login
+              </button>
+            </form>
+          </>
         )}
-
-        {/* JWT info badge */}
-        <div style={{
-          background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)',
-          borderRadius: 'var(--radius-sm)', padding: '8px 12px',
-          fontSize: '0.78rem', color: 'var(--green)', marginBottom: '1rem',
-          display: 'flex', alignItems: 'center', gap: '6px'
-        }}>
-          🔒 Secured with JWT Authentication
-        </div>
-
-        <p style={{ textAlign: 'center', fontSize: '0.88rem', color: 'var(--text2)' }}>
-          No account? <Link to="/register" style={{ color: 'var(--accent2)' }}>Register free</Link>
-        </p>
       </div>
     </div>
   );

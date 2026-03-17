@@ -41,16 +41,30 @@ public class User {
     @Column(unique = true)
     private String referralCode;
     private String referredByCode;
-    private Integer referralCount = 0;
-    private Integer badgeCount    = 0;
-    private Integer resumeScore   = 0;
+    private Integer referralCount   = 0;
+    private Integer badgeCount      = 0;
+    private Integer resumeScore     = 0;
     private String  resumeFeedback;
 
     // Gamification
-    private Integer points        = 0;
-    private Integer streakDays    = 0;
+    private Integer points          = 0;
+    private Integer streakDays      = 0;
     private LocalDate lastApplied;
-    private Integer longestStreak = 0;
+    private Integer longestStreak   = 0;
+
+    // 2FA
+    private boolean twoFactorEnabled = false;
+    private String  twoFactorCode;
+    private LocalDateTime twoFactorExpiry;
+
+    // Login history (last 5 logins stored as JSON string)
+    @Column(length = 2000)
+    private String loginHistory = "[]";
+
+    // Account deletion
+    private boolean deletionRequested = false;
+    private String fcmToken;
+    private LocalDateTime deletionRequestedAt;
 
     private boolean verified  = false;
     private boolean banned    = false;
@@ -96,6 +110,12 @@ public class User {
     public Integer getStreakDays() { return streakDays; }
     public LocalDate getLastApplied() { return lastApplied; }
     public Integer getLongestStreak() { return longestStreak; }
+    public boolean isTwoFactorEnabled() { return twoFactorEnabled; }
+    public String getTwoFactorCode() { return twoFactorCode; }
+    public LocalDateTime getTwoFactorExpiry() { return twoFactorExpiry; }
+    public String getLoginHistory() { return loginHistory; }
+    public boolean isDeletionRequested() { return deletionRequested; }
+    public LocalDateTime getDeletionRequestedAt() { return deletionRequestedAt; }
     public boolean isVerified() { return verified; }
     public boolean isBanned() { return banned; }
     public LocalDateTime getCreatedAt() { return createdAt; }
@@ -131,6 +151,14 @@ public class User {
     public void setStreakDays(Integer v) { this.streakDays = v; }
     public void setLastApplied(LocalDate v) { this.lastApplied = v; }
     public void setLongestStreak(Integer v) { this.longestStreak = v; }
+    public void setTwoFactorEnabled(boolean v) { this.twoFactorEnabled = v; }
+    public void setTwoFactorCode(String v) { this.twoFactorCode = v; }
+    public void setTwoFactorExpiry(LocalDateTime v) { this.twoFactorExpiry = v; }
+    public void setLoginHistory(String v) { this.loginHistory = v; }
+    public void setDeletionRequested(boolean v) { this.deletionRequested = v; }
+    public void setDeletionRequestedAt(LocalDateTime v) { this.deletionRequestedAt = v; }
+    public String getFcmToken() { return fcmToken; }
+    public void setFcmToken(String v) { this.fcmToken = v; }
     public void setVerified(boolean v) { this.verified = v; }
     public void setBanned(boolean v) { this.banned = v; }
     public void setCreatedAt(LocalDateTime v) { this.createdAt = v; }

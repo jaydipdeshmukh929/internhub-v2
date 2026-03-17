@@ -22,11 +22,15 @@ public class JwtUtil {
     }
 
     public String generateToken(String email, String role) {
+        return generateTokenWithExpiry(email, role, expiration);
+    }
+
+    public String generateTokenWithExpiry(String email, String role, long expiryMs) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + expiryMs))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -40,12 +44,8 @@ public class JwtUtil {
     }
 
     public boolean isTokenValid(String token) {
-        try {
-            getClaims(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
+        try { getClaims(token); return true; }
+        catch (JwtException | IllegalArgumentException e) { return false; }
     }
 
     private Claims getClaims(String token) {

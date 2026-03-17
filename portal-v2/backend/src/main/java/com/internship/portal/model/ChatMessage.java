@@ -14,12 +14,14 @@ public class ChatMessage {
     private String senderEmail;
     private String senderName;
     private String receiverEmail;
-    private String roomId;          // format: "student@email_admin@email"
+    private String roomId;
 
     @Column(length = 2000)
     private String message;
 
+    @Column(name = "is_read")
     private boolean read = false;
+
     private LocalDateTime sentAt = LocalDateTime.now();
 
     public ChatMessage() {}

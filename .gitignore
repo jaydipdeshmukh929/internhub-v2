@@ -1,4 +1,7 @@
 node_modules/
+portal-v2/frontend/node_modules/
+portal-v2/backend/target/
+*.class
 uploads/
 .env
 .idea/
