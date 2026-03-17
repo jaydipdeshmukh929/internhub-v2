@@ -115,3 +115,27 @@ APPLIED → UNDER_REVIEW → SHORTLISTED → INTERVIEW_SCHEDULED → ACCEPTED
 |---|---|---|
 | Admin | admin@internhub.com | admin123 |
 | Student | student@internhub.com | student123 |
+
+
+
+
+
+## 🚀 Advanced Features (InternHub v2)
+
+### 🔐 Security
+- Two-Factor Authentication (2FA)
+- Login History Tracking
+- Account Deletion Request System
+- JWT with Remember Me (30 days)
+
+### 🤖 AI Features
+- AI Cover Letter Generator
+- AI Interview Preparation System
+- AI Job Match Score
+- AI Chatbot Assistant
+- Resume Parser (Auto-fill Profile)
+
+### 📱 Advanced Capabilities
+- Firebase Push Notifications (FCM ready)
+- Offline Mode Support
+- React Native Mobile App Ready
