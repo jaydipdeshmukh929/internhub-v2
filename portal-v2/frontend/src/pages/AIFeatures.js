@@ -383,31 +383,76 @@ function ResumeParserTab({ user }) {
 }
 
 // ── Chatbot Tab ───────────────────────────────────────────────────────────────
+
+// ── Chatbot Tab ───────────────────────────────────────────────────────────────
 function ChatbotTab({ user }) {
   const [messages, setMessages] = useState([
-    { role:'bot', text:"Hi " + user.name?.split(' ')[0] + "! 👋 I'm your InternHub AI Assistant. Ask me anything about using the platform — applying, badges, streaks, 2FA, cover letters, and more!" }
+    { role:'bot', text:"Hi " + (user.name?.split(' ')[0] || 'there') + "! 👋 I'm your InternHub AI Assistant powered by Claude.\n\nI can help with anything — applying to internships, badges, streaks, AI features, career tips, interview advice, and much more. What would you like to know?" }
   ]);
-  const [input, setInput]   = useState('');
-  const [loading, setLoading] = useState(false);
-  const bottomRef           = useRef(null);
+  const [input, setInput]       = useState('');
+  const [loading, setLoading]   = useState(false);
+  const [isAI, setIsAI]         = useState(false);
+  const bottomRef               = useRef(null);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:'smooth' }); }, [messages]);
 
-  const send = async (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-    const q = input.trim();
+  // Build history in Claude API format (exclude first bot greeting)
+  const buildHistory = () => {
+    const hist = [];
+    for (let i = 1; i < messages.length; i++) {
+      const m = messages[i];
+      if (m.role === 'user') hist.push({ role:'user',      content: m.text });
+      else                   hist.push({ role:'assistant', content: m.text });
+    }
+    return hist;
+  };
+
+  const localFallback = (q) => {
+    const t = q.toLowerCase().replace(/[?!,]/g,'');
+    const has = (w) => t.includes(w);
+    if (has('hello')||has('hi')||has('hey')) return "Hi there! 👋 Ask me about applying, badges, streaks, AI features, or anything about InternHub!";
+    if (has('apply')||has('application')) return "To apply:\n1️⃣ Go to Explore\n2️⃣ Click an internship\n3️⃣ Click Apply Now\n4️⃣ Write cover letter\n5️⃣ Submit!\n\nTrack on My Applications page.";
+    if (has('badge')) return "12 badges to earn! First Step (1st apply), Explorer (5 apps), Go-Getter (10 apps), Profile Pro (80% profile), Resume Ready, Accepted!, Interview Star, Certified, and more. Each gives +50 pts!";
+    if (has('point')||has('earn')&&has('point')) return "Earn points:\n📝 Apply = +10\n📄 Resume = +20\n⭐ 80% profile = +50\n🤝 Referral = +30\n📜 Certificate = +25\nCheck 🏆 Gamification for all!";
+    if (has('streak')) return "Apply every day to build a streak! 3 days = Hot Streak badge, 7 days = Week Warrior, 30 days = Unstoppable. Bonus pts = 5 × streak days!";
+    if (has('resume')&&has('upload')||has('upload')&&has('resume')) return "Profile → Resume & Photo tab → drag & drop PDF → Upload Resume. Auto-attaches to all applications!";
+    if (has('cover letter')||has('cover')&&has('letter')) return "🤖 AI Features → Cover Letter tab → select internship → choose tone → Generate! Personalized using your profile skills.";
+    if (has('interview')&&(has('prep')||has('practice')||has('question'))) return "🤖 AI Features → Interview Prep → select internship → Get Questions! Role-specific General, Technical & HR questions with tips.";
+    if (has('job match')||has('match')&&has('score')) return "🤖 AI Features → Job Match Score → select internship → Check Score! Based on skill match (70%), profile bonus (+8), resume bonus (+5).";
+    if (has('2fa')||has('two factor')) return "🔒 Security Settings → Enable 2FA. Each login needs password + 6-digit email code. Super secure!";
+    if (has('forgot')&&has('password')||has('reset')&&has('password')) return "Login page → Forgot password? → Enter email → Enter OTP from email → Set new password. OTP expires in 10 mins!";
+    if (has('streak')) return "Apply every day to build a streak! 3 days = Hot Streak, 7 days = Week Warrior badge!";
+    if (has('profile')&&(has('complete')||has('percent'))) return "Complete: Name 15%, Bio 15%, Skills 15%, College 10%, Degree 10%, Phone 10%, Resume 15%, Photo 10%. Hit 80% for Profile Pro badge!";
+    if (has('level')||has('rank')) return "Levels: Bronze(0-74) → Silver(75-149) → Gold(150-299) → Platinum(300-499) → Diamond(500+). Check 🏆 Gamification!";
+    if (has('referral')||has('refer')) return "Features → Referral section → copy your code → share with friends → earn 30pts per signup!";
+    if (has('save')||has('bookmark')) return "Click ☆ on any internship card to bookmark it. View saved ones in the Saved page!";
+    if (has('thank')) return "You're welcome! 😊 Good luck with your internship hunt!";
+    return "I can help with:\n📝 Applying · 🏅 Badges · 🔥 Streaks\n🤖 AI Features · 🔒 Security · 💰 Points\n\nJust ask your question naturally! 😊";
+  };
+
+  const send = async (text) => {
+    const q = (text || input).trim();
+    if (!q) return;
     setInput('');
     setMessages(m => [...m, { role:'user', text:q }]);
     setLoading(true);
     try {
-      const r = await chatbotMessage(q);
-      setMessages(m => [...m, { role:'bot', text:r.data.reply }]);
-    } catch {
-      setMessages(m => [...m, { role:'bot', text:"Sorry, I'm having trouble right now. Please try again!" }]);
+      const r = await chatbotMessage({ message: q, history: buildHistory() });
+      if (r.data && r.data.reply) {
+        setIsAI(r.data.source === 'claude');
+        setMessages(m => [...m, { role:'bot', text:r.data.reply }]);
+      } else {
+        setMessages(m => [...m, { role:'bot', text:localFallback(q) }]);
+      }
+    } catch (err) {
+      console.error('Chat error:', err);
+      // Use local fallback instead of error message
+      setMessages(m => [...m, { role:'bot', text:localFallback(q) }]);
     }
     finally { setLoading(false); }
   };
+
+  const handleSubmit = (e) => { e.preventDefault(); send(); };
 
   const quickQ = [
     'How do I apply?',
@@ -415,55 +460,124 @@ function ChatbotTab({ user }) {
     'What is a streak?',
     'How to upload resume?',
     'What is 2FA?',
+    'What are AI features?',
+    'How is job match calculated?',
+    'How to earn points?',
   ];
 
+  const formatText = (text) => {
+    // Convert newlines to <br> and preserve formatting
+    return text.split('\n').map((line, i) => (
+      <span key={i}>{line}{i < text.split('\n').length - 1 && <br/>}</span>
+    ));
+  };
+
   return (
-    <div style={{ maxWidth:'680px' }}>
-      <div className="card" style={{ display:'flex', flexDirection:'column', height:'520px' }}>
+    <div style={{ maxWidth:'760px' }}>
+      {/* AI Status badge */}
+      <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'12px' }}>
+        <div style={{
+          display:'flex', alignItems:'center', gap:'6px', padding:'5px 12px',
+          borderRadius:'20px', fontSize:'0.78rem', fontWeight:600,
+          background: isAI ? 'rgba(34,197,94,0.1)' : 'rgba(124,107,255,0.1)',
+          border: `1px solid ${isAI ? 'rgba(34,197,94,0.3)' : 'rgba(124,107,255,0.3)'}`,
+          color: isAI ? 'var(--green)' : 'var(--accent2)',
+        }}>
+          <span style={{ width:'7px', height:'7px', borderRadius:'50%', background: isAI ? 'var(--green)' : 'var(--accent2)', display:'inline-block' }} />
+          {isAI ? '🧠 Powered by Claude AI' : '🤖 AI Assistant (Keyword Mode)'}
+        </div>
+        {!isAI && (
+          <span style={{ fontSize:'0.75rem', color:'var(--text3)' }}>
+            Add Anthropic API key in application.properties for full AI
+          </span>
+        )}
+      </div>
+
+      <div className="card" style={{ display:'flex', flexDirection:'column', height:'580px' }}>
         {/* Messages */}
-        <div style={{ flex:1, overflowY:'auto', padding:'1rem', display:'flex', flexDirection:'column', gap:'10px' }}>
+        <div style={{ flex:1, overflowY:'auto', padding:'1.2rem', display:'flex', flexDirection:'column', gap:'12px' }}>
           {messages.map((m, i) => (
-            <div key={i} style={{ display:'flex', justifyContent: m.role==='user' ? 'flex-end' : 'flex-start' }}>
+            <div key={i} style={{ display:'flex', justifyContent: m.role==='user' ? 'flex-end' : 'flex-start', alignItems:'flex-end', gap:'8px' }}>
               {m.role === 'bot' && (
-                <div style={{ width:'32px', height:'32px', borderRadius:'50%', background:'linear-gradient(135deg, var(--accent), var(--accent2))', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem', flexShrink:0, marginRight:'8px' }}>🤖</div>
+                <div style={{
+                  width:'34px', height:'34px', borderRadius:'50%', flexShrink:0,
+                  background:'linear-gradient(135deg, var(--accent), var(--accent2))',
+                  display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem',
+                }}>🤖</div>
               )}
               <div style={{
-                maxWidth:'80%', padding:'10px 14px',
-                borderRadius: m.role==='user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                background: m.role==='user' ? 'var(--accent)' : 'var(--surface2)',
+                maxWidth:'78%', padding:'12px 16px',
+                borderRadius: m.role==='user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                background: m.role==='user'
+                  ? 'linear-gradient(135deg, var(--accent), var(--accent2))'
+                  : 'var(--surface2)',
                 color: m.role==='user' ? 'white' : 'var(--text)',
-                fontSize:'0.88rem', lineHeight:'1.6',
-              }}>{m.text}</div>
+                fontSize:'0.88rem', lineHeight:'1.65',
+                boxShadow: m.role==='user' ? '0 2px 12px rgba(124,107,255,0.3)' : 'none',
+              }}>
+                {formatText(m.text)}
+              </div>
+              {m.role === 'user' && (
+                <div style={{
+                  width:'32px', height:'32px', borderRadius:'50%', flexShrink:0,
+                  background:'var(--surface2)', display:'flex', alignItems:'center',
+                  justifyContent:'center', color:'var(--accent2)', fontWeight:700, fontSize:'0.85rem',
+                }}>
+                  {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+              )}
             </div>
           ))}
+
+          {/* Typing indicator */}
           {loading && (
-            <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-              <div style={{ width:'32px', height:'32px', borderRadius:'50%', background:'linear-gradient(135deg, var(--accent), var(--accent2))', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem' }}>🤖</div>
-              <div style={{ padding:'10px 14px', background:'var(--surface2)', borderRadius:'18px 18px 18px 4px', fontSize:'0.88rem', color:'var(--text3)' }}>Typing...</div>
+            <div style={{ display:'flex', alignItems:'flex-end', gap:'8px' }}>
+              <div style={{ width:'34px', height:'34px', borderRadius:'50%', background:'linear-gradient(135deg, var(--accent), var(--accent2))', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem' }}>🤖</div>
+              <div style={{ padding:'12px 18px', background:'var(--surface2)', borderRadius:'20px 20px 20px 4px', display:'flex', gap:'5px', alignItems:'center' }}>
+                {[0,1,2].map(i => (
+                  <div key={i} style={{
+                    width:'8px', height:'8px', borderRadius:'50%', background:'var(--accent2)',
+                    animation:'bounce 1.2s ease-in-out infinite',
+                    animationDelay: `${i * 0.2}s`,
+                    opacity:0.7,
+                  }} />
+                ))}
+              </div>
             </div>
           )}
           <div ref={bottomRef} />
         </div>
 
-        {/* Quick questions */}
-        <div style={{ padding:'8px 12px', display:'flex', gap:'6px', flexWrap:'wrap', borderTop:'1px solid var(--border)' }}>
+        {/* Quick question chips */}
+        <div style={{ padding:'10px 14px', display:'flex', gap:'6px', flexWrap:'wrap', borderTop:'1px solid var(--border)', background:'var(--surface)' }}>
           {quickQ.map(q => (
-            <button key={q} onClick={() => { setInput(q); }}
-              style={{ padding:'4px 10px', borderRadius:'14px', border:'1px solid var(--border)', background:'var(--surface2)', color:'var(--text2)', fontSize:'0.75rem', cursor:'pointer' }}>
+            <button key={q} onClick={() => send(q)} disabled={loading}
+              style={{ padding:'4px 12px', borderRadius:'16px', border:'1px solid var(--border)',
+                background:'var(--surface2)', color:'var(--text2)', fontSize:'0.75rem',
+                cursor:'pointer', transition:'all 0.15s', whiteSpace:'nowrap' }}>
               {q}
             </button>
           ))}
         </div>
 
         {/* Input */}
-        <form onSubmit={send} style={{ padding:'12px', borderTop:'1px solid var(--border)', display:'flex', gap:'8px' }}>
-          <input className="form-control" placeholder="Ask me anything..."
-            value={input} onChange={e => setInput(e.target.value)}
-            style={{ flex:1, padding:'10px 14px', borderRadius:'20px' }} />
+        <form onSubmit={handleSubmit} style={{ padding:'12px 16px', borderTop:'1px solid var(--border)', display:'flex', gap:'10px', alignItems:'center' }}>
+          <input className="form-control" placeholder="Ask me anything about InternHub..."
+            value={input} onChange={e => setInput(e.target.value)} disabled={loading}
+            style={{ flex:1, padding:'11px 18px', borderRadius:'24px', fontSize:'0.88rem' }} />
           <button className="btn btn-primary" type="submit" disabled={loading || !input.trim()}
-            style={{ borderRadius:'20px', padding:'10px 20px' }}>Send →</button>
+            style={{ borderRadius:'24px', padding:'11px 24px', flexShrink:0 }}>
+            {loading ? '...' : 'Send →'}
+          </button>
         </form>
       </div>
+
+      <style>{`
+        @keyframes bounce {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-6px); }
+        }
+      `}</style>
     </div>
   );
 }

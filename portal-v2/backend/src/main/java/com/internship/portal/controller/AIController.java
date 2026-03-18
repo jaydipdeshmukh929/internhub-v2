@@ -1,11 +1,14 @@
 package com.internship.portal.controller;
 
 import com.internship.portal.service.AIService;
+import com.internship.portal.service.ClaudeAIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -13,7 +16,8 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:3000")
 public class AIController {
 
-    @Autowired private AIService aiService;
+    @Autowired private AIService      aiService;
+    @Autowired private ClaudeAIService claudeAIService;
 
     @PostMapping("/cover-letter")
     public ResponseEntity<?> coverLetter(@RequestBody Map<String, Object> body, Authentication auth) {
@@ -41,8 +45,15 @@ public class AIController {
         return ResponseEntity.ok(aiService.parseResume(file, email));
     }
 
+    // Real AI chat using Claude API with conversation history
     @PostMapping("/chat")
-    public ResponseEntity<?> chat(@RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(aiService.chatbotReply(body.getOrDefault("message", "")));
+    public ResponseEntity<?> chat(@RequestBody Map<String, Object> body, Authentication auth) {
+        String email = auth != null ? (String) auth.getPrincipal() : "";
+        String message = (String) body.getOrDefault("message", "");
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> history = (List<Map<String, String>>) body.get("history");
+
+        return ResponseEntity.ok(claudeAIService.chat(message, email, history));
     }
 }

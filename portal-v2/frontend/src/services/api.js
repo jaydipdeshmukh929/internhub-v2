@@ -130,6 +130,6 @@ export const generateCoverLetter    = d    => API.post('/ai/cover-letter', d);
 export const getInterviewPrep       = id   => API.get('/ai/interview-prep', { params: { internshipId: id } });
 export const getJobMatchScore       = id   => API.get('/ai/job-match', { params: { internshipId: id } });
 export const parseResume            = file => { const fd = new FormData(); fd.append('file', file); return API.post('/ai/parse-resume', fd, { headers: { 'Content-Type': 'multipart/form-data' } }); };
-export const chatbotMessage         = msg  => API.post('/ai/chat', { message: msg });
+export const chatbotMessage         = d     => API.post('/ai/chat', typeof d === 'string' ? { message: d } : d);
 
 export default API;
