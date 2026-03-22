@@ -133,3 +133,45 @@ export const parseResume            = file => { const fd = new FormData(); fd.ap
 export const chatbotMessage         = d     => API.post('/ai/chat', typeof d === 'string' ? { message: d } : d);
 
 export default API;
+
+// Admin Profile
+export const changePassword = d => API.put('/users/change-password', d);
+export const deleteAccount  = d => API.delete('/users/delete-account', { data: d });
+
+// Discovery
+export const addSearchHistory    = d      => API.post('/discovery/search-history', d);
+export const getSearchHistory    = ()     => API.get('/discovery/search-history');
+export const clearSearchHistory  = ()     => API.delete('/discovery/search-history');
+export const saveFilterPreset    = d      => API.post('/discovery/save-filter', d);
+export const getSavedFilters2    = ()     => API.get('/discovery/saved-filters');
+export const deleteFilterPreset  = name  => API.delete(`/discovery/saved-filters/${name}`);
+export const searchBySkill       = skill => API.get(`/discovery/skill/${skill}`);
+export const toggleFollowCompany = d      => API.post('/discovery/follow-company', d);
+export const getFollowedCompanies= ()     => API.get('/discovery/followed-companies');
+export const getAlumniNetwork    = ()     => API.get('/discovery/alumni');
+export const getMapInternships   = ()     => API.get('/discovery/map');
+
+// Documents
+export const genCertificate  = d => API.post('/documents/certificate', d);
+export const genOfferLetter  = d => API.post('/documents/offer-letter', d);
+export const genNOC          = d => API.post('/documents/noc', d);
+
+// Discussions
+export const getDiscussions     = cat    => API.get('/discussions', { params: { category: cat } });
+export const createDiscussion   = d      => API.post('/discussions', d);
+export const getDiscussion      = id     => API.get(`/discussions/${id}`);
+export const replyDiscussion    = (id,d) => API.post(`/discussions/${id}/reply`, d);
+export const likeDiscussion     = id     => API.post(`/discussions/${id}/like`);
+export const deleteDiscussion   = id     => API.delete(`/discussions/${id}`);
+
+// Advanced Analytics
+export const getFunnelAnalytics  = () => API.get('/analytics/advanced/funnel');
+export const getTimeHireAnalytics= () => API.get('/analytics/advanced/time-hire');
+export const getCohortAnalytics  = () => API.get('/analytics/advanced/cohort');
+
+// Public Profile
+export const enablePublicProfile  = () => API.post('/profile/enable-public');
+export const disablePublicProfile = () => API.post('/profile/disable-public');
+export const getPublicProfile     = slug => API.get(`/student/${slug}`);
+export const activatePremium      = months => API.post('/profile/premium', { months });
+export const markAlumni           = completedAt => API.post('/profile/mark-alumni', { completedAt });

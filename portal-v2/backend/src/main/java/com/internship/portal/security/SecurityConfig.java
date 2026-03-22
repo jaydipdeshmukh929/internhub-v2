@@ -26,22 +26,17 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Fully public — no token needed
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/api/internships/all", "/api/internships/latest",
-                                "/api/internships/trending", "/api/internships/search",
-                                "/api/internships/{id}", "/api/internships/similar/**",
-                                "/api/reviews/company/**", "/api/companies/**",
-                                "/api/announcements", "/api/qna/internship/**"
+                                "/api/admin-invite/validate/**",
+                                "/api/admin-invite/register",
+                                "/api/student/**",
+                                "/api/discovery/alumni",
+                                "/api/discovery/map",
+                                "/api/discovery/skill/**"
                         ).permitAll()
-                        .requestMatchers(
-                                "/api/analytics/admin", "/api/internships/company-analytics",
-                                "/api/users/all", "/api/users/ban/**",
-                                "/api/applications/all", "/api/applications/analytics",
-                                "/api/internships/add", "/api/internships/update/**",
-                                "/api/internships/delete/**", "/api/admin/**",
-                                "/api/announcements/**", "/api/qna/all", "/api/qna/answer/**"
-                        ).hasRole("ADMIN")
+                        // Everything else requires a valid JWT — role checks done in code or by hasRole
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

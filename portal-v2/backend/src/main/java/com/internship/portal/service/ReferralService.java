@@ -78,4 +78,8 @@ public class ReferralService {
         res.put("message", "Referral applied! " + referrer.getName() + " gets credit.");
         return res;
     }
+
+    public String generateReferralCode(String name) {
+        return null;
+    }
 }

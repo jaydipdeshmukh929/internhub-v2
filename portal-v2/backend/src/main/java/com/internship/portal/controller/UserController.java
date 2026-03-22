@@ -4,6 +4,7 @@ import com.internship.portal.repository.UserRepository;
 import com.internship.portal.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,7 +15,7 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
 
-    @Autowired private UserService userService;
+    @Autowired private UserService    userService;
     @Autowired private UserRepository userRepository;
 
     @GetMapping("/{email}")
@@ -47,7 +48,27 @@ public class UserController {
     }
 
     @PutMapping("/ban/{id}")
-    public ResponseEntity<?> ban(@PathVariable Long id, @RequestBody Map<String, Boolean> body) {
+    public ResponseEntity<?> ban(@PathVariable Long id,
+                                 @RequestBody Map<String, Boolean> body) {
         return ResponseEntity.ok(userService.banUser(id, body.get("banned")));
+    }
+
+    // Change password — works for both admin and student
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> body,
+                                            Authentication auth) {
+        String email = auth != null ? (String) auth.getPrincipal() : body.get("email");
+        return ResponseEntity.ok(userService.changePassword(
+                email,
+                body.get("currentPassword"),
+                body.get("newPassword")));
+    }
+
+    // Permanently delete own account — requires password confirmation
+    @DeleteMapping("/delete-account")
+    public ResponseEntity<?> deleteAccount(@RequestBody Map<String, String> body,
+                                           Authentication auth) {
+        String email = auth != null ? (String) auth.getPrincipal() : body.get("email");
+        return ResponseEntity.ok(userService.deleteAccount(email, body.get("password")));
     }
 }

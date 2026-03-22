@@ -41,31 +41,40 @@ public class User {
     @Column(unique = true)
     private String referralCode;
     private String referredByCode;
-    private Integer referralCount   = 0;
-    private Integer badgeCount      = 0;
-    private Integer resumeScore     = 0;
+    private Integer referralCount = 0;
+    private Integer badgeCount    = 0;
+    private Integer resumeScore   = 0;
     private String  resumeFeedback;
 
     // Gamification
-    private Integer points          = 0;
-    private Integer streakDays      = 0;
+    private Integer points        = 0;
+    private Integer streakDays    = 0;
     private LocalDate lastApplied;
-    private Integer longestStreak   = 0;
+    private Integer longestStreak = 0;
 
-    // 2FA
+    // Security
     private boolean twoFactorEnabled = false;
     private String  twoFactorCode;
     private LocalDateTime twoFactorExpiry;
-
-    // Login history (last 5 logins stored as JSON string)
-    @Column(length = 2000)
     private String loginHistory = "[]";
-
-    // Account deletion
     private boolean deletionRequested = false;
-    private String fcmToken;
     private LocalDateTime deletionRequestedAt;
+    private String fcmToken;
 
+    // Social / Discovery
+    private String followedCompanies = "";   // comma-separated company names
+    private String searchHistory     = "[]"; // JSON array of recent searches
+    private String savedFilters      = "[]"; // JSON array of saved filter presets
+    private boolean isPremium        = false;
+    private LocalDateTime premiumUntil;
+    private boolean isAlumni         = false;
+    private String completedAt;              // internship completion date
+
+    // Public profile
+    private String publicSlug;              // e.g. "rahul-sharma-123"
+    private boolean profilePublic = false;
+
+    // Verification
     private boolean verified  = false;
     private boolean banned    = false;
 
@@ -82,7 +91,7 @@ public class User {
 
     public User() {}
 
-    // Getters
+    // ── Getters ────────────────────────────────────────────────────────────────
     public Long getId() { return id; }
     public String getName() { return name; }
     public String getEmail() { return email; }
@@ -116,6 +125,16 @@ public class User {
     public String getLoginHistory() { return loginHistory; }
     public boolean isDeletionRequested() { return deletionRequested; }
     public LocalDateTime getDeletionRequestedAt() { return deletionRequestedAt; }
+    public String getFcmToken() { return fcmToken; }
+    public String getFollowedCompanies() { return followedCompanies; }
+    public String getSearchHistory() { return searchHistory; }
+    public String getSavedFilters() { return savedFilters; }
+    public boolean isPremium() { return isPremium; }
+    public LocalDateTime getPremiumUntil() { return premiumUntil; }
+    public boolean isAlumni() { return isAlumni; }
+    public String getCompletedAt() { return completedAt; }
+    public String getPublicSlug() { return publicSlug; }
+    public boolean isProfilePublic() { return profilePublic; }
     public boolean isVerified() { return verified; }
     public boolean isBanned() { return banned; }
     public LocalDateTime getCreatedAt() { return createdAt; }
@@ -123,8 +142,8 @@ public class User {
     public LocalDateTime getOtpExpiry() { return otpExpiry; }
     public String getSavedInternshipIds() { return savedInternshipIds; }
 
-    // Setters
-    public void setId(Long id) { this.id = id; }
+    // ── Setters ────────────────────────────────────────────────────────────────
+    public void setId(Long v) { this.id = v; }
     public void setName(String v) { this.name = v; }
     public void setEmail(String v) { this.email = v; }
     public void setPassword(String v) { this.password = v; }
@@ -157,8 +176,16 @@ public class User {
     public void setLoginHistory(String v) { this.loginHistory = v; }
     public void setDeletionRequested(boolean v) { this.deletionRequested = v; }
     public void setDeletionRequestedAt(LocalDateTime v) { this.deletionRequestedAt = v; }
-    public String getFcmToken() { return fcmToken; }
     public void setFcmToken(String v) { this.fcmToken = v; }
+    public void setFollowedCompanies(String v) { this.followedCompanies = v; }
+    public void setSearchHistory(String v) { this.searchHistory = v; }
+    public void setSavedFilters(String v) { this.savedFilters = v; }
+    public void setPremium(boolean v) { this.isPremium = v; }
+    public void setPremiumUntil(LocalDateTime v) { this.premiumUntil = v; }
+    public void setAlumni(boolean v) { this.isAlumni = v; }
+    public void setCompletedAt(String v) { this.completedAt = v; }
+    public void setPublicSlug(String v) { this.publicSlug = v; }
+    public void setProfilePublic(boolean v) { this.profilePublic = v; }
     public void setVerified(boolean v) { this.verified = v; }
     public void setBanned(boolean v) { this.banned = v; }
     public void setCreatedAt(LocalDateTime v) { this.createdAt = v; }

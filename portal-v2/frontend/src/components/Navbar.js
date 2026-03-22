@@ -14,13 +14,13 @@ export default function Navbar() {
 
   useEffect(() => {
     if (user?.email) {
-      getUnreadCount(user.email).then(r => setUnread(r.data.count || 0)).catch(() => {});
-      getChatUnread(user.email).then(r => setChatUnread(r.data.count || 0)).catch(() => {});
+      getUnreadCount(user.email).then(r => setUnread(r.data.count||0)).catch(()=>{});
+      getChatUnread(user.email).then(r => setChatUnread(r.data.count||0)).catch(()=>{});
     }
   }, [user, location.pathname]);
 
   const logout = () => { signOut(); navigate('/login'); };
-  const a = p => location.pathname === p ? 'nav-link active' : 'nav-link';
+  const a = p => location.pathname.startsWith(p) && (p.length > 1 || location.pathname === '/') ? 'nav-link active' : 'nav-link';
 
   if (!user) return null;
 
@@ -42,6 +42,8 @@ export default function Navbar() {
           <Link to="/saved"           className={a('/saved')}>Saved</Link>
           <Link to="/features"        className={a('/features')}>Features</Link>
           <Link to="/ai"              className={a('/ai')}>🤖 AI</Link>
+          <Link to="/documents"       className={a('/documents')}>📄 Docs</Link>
+          <Link to="/forum"           className={a('/forum')}>💬 Forum</Link>
           <Link to="/analytics"       className={a('/analytics')}>Analytics</Link>
           <Link to="/gamification"    className={a('/gamification')}>🏆</Link>
           <Link to="/announcements"   className={a('/announcements')}>📢</Link>
@@ -52,13 +54,16 @@ export default function Navbar() {
         </>)}
 
         {user.role === 'ADMIN' && (<>
-          <Link to="/admin"              className={a('/admin')}>Dashboard</Link>
-          <Link to="/admin/internships"  className={a('/admin/internships')}>Internships</Link>
-          <Link to="/admin/applications" className={a('/admin/applications')}>Applications</Link>
-          <Link to="/admin/users"        className={a('/admin/users')}>Users</Link>
-          <Link to="/admin/features"     className={a('/admin/features')}>Features</Link>
-          <Link to="/announcements"      className={a('/announcements')}>📢</Link>
-          <Badge to="/chat"              label="💬" count={chatUnread} />
+          <Link to="/admin"                    className={a('/admin')}>Dashboard</Link>
+          <Link to="/admin/internships"        className={a('/admin/internships')}>Internships</Link>
+          <Link to="/admin/applications"       className={a('/admin/applications')}>Applications</Link>
+          <Link to="/admin/users"              className={a('/admin/users')}>Users</Link>
+          <Link to="/admin/features"           className={a('/admin/features')}>Features</Link>
+          <Link to="/admin/analytics/advanced" className={a('/admin/analytics/advanced')}>Analytics+</Link>
+          <Link to="/forum"                    className={a('/forum')}>Forum</Link>
+          <Link to="/announcements"            className={a('/announcements')}>📢</Link>
+          <Badge to="/chat"                    label="💬" count={chatUnread} />
+          <Link to="/admin/profile"            className={a('/admin/profile')}>Profile</Link>
         </>)}
 
         <button onClick={toggle} className="nav-link" style={{ fontSize:'1rem', padding:'6px 10px' }}>
