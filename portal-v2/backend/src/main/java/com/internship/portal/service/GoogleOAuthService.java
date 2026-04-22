@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Service
+//@Service
 public class GoogleOAuthService {
 
     @Autowired private UserRepository userRepository;
