@@ -38,6 +38,20 @@ public class User {
     @Column(length = 2000)
     private String portfolioLinks = "";
 
+
+
+    @Column(columnDefinition = "TEXT")
+    private String loginHistory;
+
+    @Column(columnDefinition = "TEXT")
+    private String searchHistory;
+
+    @Column(columnDefinition = "TEXT")
+    private String savedInternshipIds;
+
+    @Column(columnDefinition = "TEXT")
+    private String followedCompanies;
+
     @Column(unique = true)
     private String referralCode;
     private String referredByCode;
@@ -56,14 +70,13 @@ public class User {
     private boolean twoFactorEnabled = false;
     private String  twoFactorCode;
     private LocalDateTime twoFactorExpiry;
-    private String loginHistory = "[]";
+
     private boolean deletionRequested = false;
     private LocalDateTime deletionRequestedAt;
     private String fcmToken;
 
     // Social / Discovery
-    private String followedCompanies = "";   // comma-separated company names
-    private String searchHistory     = "[]"; // JSON array of recent searches
+    // JSON array of recent searches
     private String savedFilters      = "[]"; // JSON array of saved filter presets
     private boolean isPremium        = false;
     private LocalDateTime premiumUntil;
@@ -84,8 +97,8 @@ public class User {
     private String otp;
     private LocalDateTime otpExpiry;
 
-    @Column(length = 1000)
-    private String savedInternshipIds = "";
+
+
 
     public enum Role { ADMIN, STUDENT, COMPANY }
 
