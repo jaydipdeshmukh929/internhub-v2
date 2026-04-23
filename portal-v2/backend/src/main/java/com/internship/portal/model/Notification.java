@@ -16,8 +16,11 @@ public class Notification {
     @Column(length = 1000)
     private String message;
 
-    private String type;        // APPLICATION_UPDATE, NEW_INTERNSHIP, INTERVIEW, SYSTEM
+    private String type;
+
+    @Column(name = "is_read")
     private boolean read = false;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
