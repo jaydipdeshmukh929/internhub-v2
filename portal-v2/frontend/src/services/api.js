@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // In production, REACT_APP_API_URL is set to your Railway backend URL
-// In development, falls back to localhost:8081
+// In development, falls back to localhost:8080
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 const API = axios.create({ baseURL: BASE_URL });
