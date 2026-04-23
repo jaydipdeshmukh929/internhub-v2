@@ -181,4 +181,4 @@ export const getPublicProfile     = slug => API.get(`/student/${slug}`);
 export const activatePremium      = months => API.post('/profile/premium', { months });
 export const markAlumni           = completedAt => API.post('/profile/mark-alumni', { completedAt });
 
-export default API_URL;
+export default BASE_URL;
