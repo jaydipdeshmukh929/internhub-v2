@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
-@RestController @RequestMapping("/api/discussions") @CrossOrigin(origins="http://localhost:3000")
+@RestController @RequestMapping("/api/discussions") @CrossOrigin(origins="*")
 public class DiscussionController {
     @Autowired private DiscussionService discussionService;
     @GetMapping public ResponseEntity<?> getPosts(@RequestParam(required=false) String category) { return ResponseEntity.ok(discussionService.getPosts(category)); }

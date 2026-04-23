@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
-@RestController @CrossOrigin(origins="http://localhost:3000")
+@RestController @CrossOrigin(origins="*")
 public class PublicProfileController {
     @Autowired private PublicProfileService service;
     @PostMapping("/api/profile/enable-public") public ResponseEntity<?> enable(Authentication a) { return ResponseEntity.ok(service.enablePublicProfile((String)a.getPrincipal())); }

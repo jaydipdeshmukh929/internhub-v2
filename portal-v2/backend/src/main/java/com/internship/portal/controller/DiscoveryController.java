@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
-@RestController @RequestMapping("/api/discovery") @CrossOrigin(origins="http://localhost:3000")
+@RestController @RequestMapping("/api/discovery") @CrossOrigin(origins="*")
 public class DiscoveryController {
     @Autowired private DiscoveryService discoveryService;
     @PostMapping("/search-history") public ResponseEntity<?> addHistory(@RequestBody Map<String,String> b, Authentication a) { return ResponseEntity.ok(discoveryService.addSearchHistory((String)a.getPrincipal(), b.get("keyword"))); }

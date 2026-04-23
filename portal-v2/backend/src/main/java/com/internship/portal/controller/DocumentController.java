@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
-@RestController @RequestMapping("/api/documents") @CrossOrigin(origins="http://localhost:3000")
+@RestController @RequestMapping("/api/documents") @CrossOrigin(origins="*")
 public class DocumentController {
     @Autowired private DocumentService documentService;
     @PostMapping("/certificate") public ResponseEntity<?> certificate(@RequestBody Map<String,String> b, Authentication a) {
