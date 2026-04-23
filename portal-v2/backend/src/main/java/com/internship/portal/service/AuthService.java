@@ -50,7 +50,11 @@ public class AuthService {
         System.out.println("========================================");
         System.out.println("REGISTER OTP for " + email + " : " + otp);
         System.out.println("========================================");
-        emailService.sendOtp(email, name, otp);
+        try {
+            emailService.sendOtp(email, name, otp);
+        } catch (Exception e) {
+            System.out.println("Email not sent (disabled): " + e.getMessage());
+        }
 
         res.put("success", true);
         res.put("message", "OTP sent! Check email or IntelliJ console.");
@@ -74,10 +78,16 @@ public class AuthService {
         user.setOtp(null);
         user.setOtpExpiry(null);
         userRepository.save(user);
-        emailService.sendWelcome(email, user.getName());
+        try {
+            emailService.sendWelcome(email, user.getName());
+        } catch (Exception e) {
+            System.out.println("Welcome email not sent: " + e.getMessage());
+        }
         res.put("success", true);
         res.put("message", "Email verified! You can now login.");
         return res;
+
+
     }
 
     public Map<String, Object> login(String email, String password,
@@ -214,7 +224,11 @@ public class AuthService {
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);
         System.out.println("RESET OTP for " + email + " : " + otp);
-        emailService.sendPasswordResetOtp(email, user.getName(), otp);
+        try {
+            emailService.sendPasswordResetOtp(email, user.getName(), otp);
+        } catch (Exception e) {
+            System.out.println("Reset email not sent: " + e.getMessage());
+        }
         res.put("success", true);
         res.put("message", "Reset OTP sent!");
         return res;
