@@ -129,7 +129,6 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Fully public — no token needed
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/internships/**",
@@ -140,7 +139,6 @@ public class SecurityConfig {
                                 "/api/discovery/map",
                                 "/api/discovery/skill/**"
                         ).permitAll()
-                        // Everything else requires a valid JWT — role checks done in code or by hasRole
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -150,16 +148,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "https://internhub-v2.vercel.app"
-        ));
+        config.setAllowedOriginPatterns(List.of("*")); // ← allow all temporarily
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
         config.setExposedHeaders(List.of("Authorization"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);  // ← change /api/** to /**
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }
