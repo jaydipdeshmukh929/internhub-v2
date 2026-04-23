@@ -25,71 +25,77 @@ public class User {
 
     private String resumePath;
     private String profilePhoto;
+
+    @Column(columnDefinition = "TEXT")
     private String bio;
+
+    @Column(columnDefinition = "TEXT")
     private String skills;
+
     private String college;
     private String degree;
     private Integer graduationYear;
     private String phone;
     private String linkedinUrl;
     private String githubUrl;
+
     private Integer profileCompletion = 0;
 
-    @Column(length = 2000)
+    @Column(columnDefinition = "TEXT")
     private String portfolioLinks = "";
-
-
-
-    @Column(columnDefinition = "TEXT")
-    private String loginHistory;
-
-    @Column(columnDefinition = "TEXT")
-    private String searchHistory;
-
-    @Column(columnDefinition = "TEXT")
-    private String savedInternshipIds;
-
-    @Column(columnDefinition = "TEXT")
-    private String followedCompanies;
 
     @Column(unique = true)
     private String referralCode;
+
     private String referredByCode;
     private Integer referralCount = 0;
-    private Integer badgeCount    = 0;
-    private Integer resumeScore   = 0;
-    private String  resumeFeedback;
+    private Integer badgeCount = 0;
+    private Integer resumeScore = 0;
+
+    @Column(columnDefinition = "TEXT")
+    private String resumeFeedback;
 
     // Gamification
-    private Integer points        = 0;
-    private Integer streakDays    = 0;
+    private Integer points = 0;
+    private Integer streakDays = 0;
     private LocalDate lastApplied;
     private Integer longestStreak = 0;
 
     // Security
     private boolean twoFactorEnabled = false;
-    private String  twoFactorCode;
+    private String twoFactorCode;
     private LocalDateTime twoFactorExpiry;
+
+    @Column(columnDefinition = "TEXT")
+    private String loginHistory = "[]";
 
     private boolean deletionRequested = false;
     private LocalDateTime deletionRequestedAt;
     private String fcmToken;
 
     // Social / Discovery
-    // JSON array of recent searches
-    private String savedFilters      = "[]"; // JSON array of saved filter presets
-    private boolean isPremium        = false;
+    @Column(columnDefinition = "TEXT")
+    private String followedCompanies = "";
+
+    @Column(columnDefinition = "TEXT")
+    private String searchHistory = "[]";
+
+    @Column(columnDefinition = "TEXT")
+    private String savedFilters = "[]";
+
+    private boolean isPremium = false;
     private LocalDateTime premiumUntil;
-    private boolean isAlumni         = false;
-    private String completedAt;              // internship completion date
+    private boolean isAlumni = false;
+
+    private String completedAt;
 
     // Public profile
-    private String publicSlug;              // e.g. "rahul-sharma-123"
+    private String publicSlug;
     private boolean profilePublic = false;
 
     // Verification
-    private boolean verified  = false;
-    private boolean banned    = false;
+    private boolean verified = false;
+    private boolean banned = false;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -97,8 +103,8 @@ public class User {
     private String otp;
     private LocalDateTime otpExpiry;
 
-
-
+    @Column(columnDefinition = "TEXT")
+    private String savedInternshipIds = "";
 
     public enum Role { ADMIN, STUDENT, COMPANY }
 
