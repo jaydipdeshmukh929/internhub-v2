@@ -34,20 +34,22 @@ export default function InternshipDetail() {
   useEffect(() => { loadData(); }, [id]);
 
   const loadData = async () => {
-    try {
-      const [iRes, saved, simRes] = await Promise.all([
-        getInternshipById(id),
-        getSavedInternships(user.email),
-        getSimilarApi(id),
-      ]);
-      setInternship(iRes.data);
-      const sIds = saved.data.map(i => String(i.id));
-      setSavedIds(sIds);
-      setIsSaved(sIds.includes(String(id)));
-      setSimilar(simRes.data || []);
-      loadReviews(iRes.data.companyName);
-    } catch { navigate('/dashboard'); }
-    finally { setLoading(false); }
+      try {
+        const [iRes, saved, simRes] = await Promise.all([
+          getInternshipById(id),
+          getSavedInternships(user.email),
+          getSimilarApi(id),
+        ]);
+        setInternship(iRes.data);
+        const sIds = saved.data.map(i => String(i.id));
+        setSavedIds(sIds);
+        setIsSaved(sIds.includes(String(id)));
+        setSimilar(simRes.data || []);
+        loadReviews(iRes.data.companyName);
+      } catch(e) {
+        console.error(e); // ← change navigate to console.error
+      }
+      finally { setLoading(false); }
   };
 
   const loadReviews = async (company) => {
