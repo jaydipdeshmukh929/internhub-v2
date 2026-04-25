@@ -68,21 +68,34 @@ export default function InternshipDetail() {
   };
 
   const handleApply = async () => {
-    setError(''); setMsg('');
+    setError('');
+    setMsg('');
+
     try {
-      const r = await applyToInternship({
-        studentEmail:user.email,
-        studentName:user.name,
-        internshipId:internship.id,
+      console.log("Sending data:", {
+        studentEmail: user.email,
+        studentName: user.name,
+        internshipId: internship.id,
         coverLetter
       });
+
+      const r = await applyToInternship({
+        studentEmail: user.email,
+        studentName: user.name,
+        internshipId: internship.id,
+        coverLetter
+      });
+
+      console.log("Response:", r.data);
 
       if (r.data.success) {
         setMsg('✅ Application submitted!');
         setShowApply(false);
-      } else setError(r.data.message);
-
-    } catch {
+      } else {
+        setError(r.data.message);
+      }
+    } catch (e) {
+      console.error("Apply error:", e);
       setError('Application failed.');
     }
   };
