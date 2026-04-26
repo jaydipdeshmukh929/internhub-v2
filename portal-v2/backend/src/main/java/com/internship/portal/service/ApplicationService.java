@@ -84,7 +84,11 @@ public class ApplicationService {
             notificationRepository.save(n);
         });
 
-        emailService.sendApplicationConfirmation(email, name, internship.getRole(), internship.getCompanyName());
+        try {
+            emailService.sendApplicationConfirmation(email, name, internship.getRole(), internship.getCompanyName());
+        } catch (Exception e) {
+            System.out.println("Email not sent: " + e.getMessage());
+        }
         res.put("success", true); res.put("message", "Application submitted successfully!");
         return res;
     }
