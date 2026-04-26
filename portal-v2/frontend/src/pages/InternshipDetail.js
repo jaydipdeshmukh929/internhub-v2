@@ -156,16 +156,21 @@ export default function InternshipDetail() {
               </button>
 
               {user.role === 'STUDENT' && (
-                <button
-                  className="btn btn-primary"
-                  style={{ zIndex: 10, position: "relative", cursor: "pointer" }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowApply(true);
-                  }}
-                >
-                  Apply Now →
-                </button>
+                  <button
+                      className="btn btn-primary"
+                      style={{
+                          zIndex: 9999,
+                          position: 'relative',
+                          pointerEvents: 'auto',
+                          cursor: 'pointer'
+                      }}
+                      onClick={() => {
+                          console.log('Apply clicked!');
+                          setShowApply(true);
+                      }}
+                  >
+                      Apply Now →
+                  </button>
               )}
             </div>
           </div>
