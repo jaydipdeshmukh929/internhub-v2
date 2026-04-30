@@ -143,39 +143,29 @@ export default function InternshipDetail() {
         {error && <div className="alert alert-error">{error}</div>}
 
         {/* Header */}
-        <div className="card" style={{ marginBottom:'1.5rem' }}>
-          <div style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:'1rem' }}>
+        <div className="card" style={{ marginBottom:'1.5rem', position:'relative', zIndex:1 }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'1rem' }}>
             <div>
-              <h1>{internship.role}</h1>
-              <div>{internship.companyName}</div>
+              <h1 style={{ fontSize:'1.5rem' }}>{internship.role}</h1>
+              <div style={{ color:'var(--accent2)', fontWeight:'600' }}>{internship.companyName}</div>
             </div>
-
-            <div>
-              <button onClick={handleBookmark}>
+            <div style={{ display:'flex', gap:'10px', position:'relative', zIndex:10 }}>
+              <button className="btn btn-outline btn-sm" onClick={handleBookmark}>
                 {isSaved ? '★ Saved' : '☆ Save'}
               </button>
-
-              {user.role === 'STUDENT' && (
-                  <button
-                      className="btn btn-primary"
-                      style={{
-                          zIndex: 9999,
-                          position: 'relative',
-                          pointerEvents: 'auto',
-                          cursor: 'pointer'
-                      }}
-                      onClick={() => {
-                          console.log('Apply clicked!');
-                          setShowApply(true);
-                      }}
-                  >
-                      Apply Now →
-                  </button>
+              {user?.role === 'STUDENT' && (
+                <button
+                  className="btn btn-primary"
+                  style={{ cursor:'pointer', pointerEvents:'all', zIndex:999 }}
+                  onClick={() => setShowApply(true)}
+                >
+                  Apply Now →
+                </button>
               )}
             </div>
           </div>
         </div>
-
+        
         {/* Similar Internships */}
         {similar.length > 0 && (
           <div>
