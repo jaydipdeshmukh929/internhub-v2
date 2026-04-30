@@ -165,7 +165,7 @@ export default function InternshipDetail() {
             </div>
           </div>
         </div>
-        
+
         {/* Similar Internships */}
         {similar.length > 0 && (
           <div>
