@@ -1,5 +1,5 @@
 package com.internship.portal.model;
-
+import java.util.*;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
