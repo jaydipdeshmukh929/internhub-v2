@@ -71,16 +71,18 @@ export default function Chat() {
   };
 
   const timeAgo = (dt) => {
-    if (!dt) return '';
-     const date = new Date(dt.endsWith('Z') ? dt : dt + 'Z');
-    const diff = Date.now() - new Date(dt).getTime();
-    const m = Math.floor(diff / 60000);
-    if (m < 1) return 'just now';
-    if (m < 60) return `${m}m ago`;
-    const h = Math.floor(m / 60);
-    if (h < 24) return `${h}h ago`;
-    return new Date(dt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-  };
+  if (!dt) return '';
+  // Backend stores LocalDateTime in IST but without timezone marker.
+  // JS parses it as UTC, so we add +5:30 offset to correct it.
+  const date = new Date(dt + '+05:30');
+  const diff = Date.now() - date.getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+};
 
   const filteredUsers = users.filter(u =>
     u.name?.toLowerCase().includes(search.toLowerCase()) ||
