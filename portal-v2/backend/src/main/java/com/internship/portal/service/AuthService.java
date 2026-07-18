@@ -1,5 +1,4 @@
 
-Authservice · JAVA
 package com.internship.portal.service;
  
 import com.internship.portal.model.User;
