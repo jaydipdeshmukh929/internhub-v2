@@ -22,6 +22,7 @@ public class EmailService {
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
+    // ─── Core send method using Resend REST API ───────────────────────────────
     private void send(String to, String subject, String body) {
         try {
             String safeBody = body
@@ -56,6 +57,8 @@ public class EmailService {
             System.out.println("Mail error: " + e.getMessage());
         }
     }
+
+    // ─── Public email methods ─────────────────────────────────────────────────
 
     public void sendOtp(String to, String name, String otp) {
         send(to, "Email Verification OTP",
@@ -97,5 +100,10 @@ public class EmailService {
         send(to, "Welcome to " + appName + "!",
             "Hi " + name + ",\n\nWelcome to " + appName +
             "! Your account is verified.\n\nStart exploring internships and build your career!\n\n— " + appName);
+    }
+
+    // ─── Used by EmailTemplateService ─────────────────────────────────────────
+    public void sendRaw(String to, String subject, String body) {
+        send(to, subject, body);
     }
 }
