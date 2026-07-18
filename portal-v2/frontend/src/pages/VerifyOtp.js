@@ -7,6 +7,7 @@ export function VerifyOtp() {
   const navigate = useNavigate();
   const location = useLocation();
   const [email] = useState(location.state?.email || '');
+  const [devOtp] = useState(location.state?.devOtp || '');  // OTP from backend
   const [otp, setOtp] = useState('');
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
@@ -36,6 +37,28 @@ export function VerifyOtp() {
         {msg && <div className="alert alert-success">{msg}</div>}
         {error && <div className="alert alert-error">{error}</div>}
 
+        {/* Show OTP on screen if email delivery not available */}
+        {devOtp && (
+          <div style={{
+            marginBottom: '1.2rem', padding: '14px 16px',
+            background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.3)',
+            borderRadius: 'var(--radius-sm)', textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text2)', marginBottom: '6px' }}>
+              📬 Your OTP (email delivery pending)
+            </div>
+            <div style={{
+              fontSize: '2rem', fontWeight: 800, letterSpacing: '10px',
+              color: 'var(--accent2)', fontFamily: 'monospace',
+            }}>
+              {devOtp}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text3)', marginTop: '4px' }}>
+              Valid for 10 minutes
+            </div>
+          </div>
+        )}
+
         <form onSubmit={submit}>
           <div className="form-group">
             <label>OTP Code</label>
@@ -50,14 +73,6 @@ export function VerifyOtp() {
           </button>
         </form>
 
-        <div style={{
-          marginTop: '1rem', padding: '10px 12px',
-          background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)',
-          borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', color: 'var(--blue)'
-        }}>
-          💡 No email? Check your IntelliJ console for the OTP.
-        </div>
-
         <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.85rem', color: 'var(--text2)' }}>
           <Link to="/login" style={{ color: 'var(--accent2)' }}>← Back to login</Link>
         </p>
@@ -70,6 +85,7 @@ export function ForgotPassword() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
+  const [devOtp, setDevOtp] = useState('');  // OTP from backend
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -83,8 +99,11 @@ export function ForgotPassword() {
     e.preventDefault(); setError(''); setLoading(true);
     try {
       const res = await forgotPassword({ email });
-      if (res.data.success) { setMsg(res.data.message); setStep(2); }
-      else setError(res.data.message);
+      if (res.data.success) {
+        setMsg(res.data.message);
+        setDevOtp(res.data.devOtp || '');  // save OTP to show on screen
+        setStep(2);
+      } else setError(res.data.message);
     } catch { setError('Server error.'); }
     finally { setLoading(false); }
   };
@@ -111,7 +130,6 @@ export function ForgotPassword() {
           {step === 1 ? 'Reset your password' : 'Enter OTP and set new password'}
         </p>
 
-        {/* Steps indicator */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem' }}>
           {['Enter Email', 'Reset Password'].map((s, i) => (
             <div key={s} style={{ flex: 1, textAlign: 'center' }}>
@@ -141,6 +159,28 @@ export function ForgotPassword() {
           </form>
         ) : (
           <form onSubmit={reset}>
+            {/* Show OTP on screen if email delivery not available */}
+            {devOtp && (
+              <div style={{
+                marginBottom: '1.2rem', padding: '14px 16px',
+                background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.3)',
+                borderRadius: 'var(--radius-sm)', textAlign: 'center',
+              }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text2)', marginBottom: '6px' }}>
+                  📬 Your Reset OTP (email delivery pending)
+                </div>
+                <div style={{
+                  fontSize: '2rem', fontWeight: 800, letterSpacing: '10px',
+                  color: 'var(--accent2)', fontFamily: 'monospace',
+                }}>
+                  {devOtp}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text3)', marginTop: '4px' }}>
+                  Valid for 10 minutes
+                </div>
+              </div>
+            )}
+
             <div className="form-group">
               <label>OTP Code</label>
               <input className="form-control"
@@ -168,14 +208,6 @@ export function ForgotPassword() {
                 </button>
               </div>
               <PasswordStrength password={newPassword} />
-            </div>
-
-            <div style={{
-              padding: '10px 12px', background: 'rgba(59,130,246,0.08)',
-              border: '1px solid rgba(59,130,246,0.2)', borderRadius: 'var(--radius-sm)',
-              fontSize: '0.78rem', color: 'var(--blue)', marginBottom: '1rem',
-            }}>
-              💡 No email? Check your IntelliJ console for the OTP.
             </div>
 
             <button className="btn btn-primary" type="submit"
