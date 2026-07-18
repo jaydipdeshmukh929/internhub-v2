@@ -72,6 +72,7 @@ export default function Chat() {
 
   const timeAgo = (dt) => {
     if (!dt) return '';
+     const date = new Date(dt.endsWith('Z') ? dt : dt + 'Z');
     const diff = Date.now() - new Date(dt).getTime();
     const m = Math.floor(diff / 60000);
     if (m < 1) return 'just now';
