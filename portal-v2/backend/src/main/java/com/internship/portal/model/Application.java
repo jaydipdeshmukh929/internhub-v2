@@ -1,3 +1,4 @@
+import java.util.*;
 package com.internship.portal.model;
 
 import jakarta.persistence.*;
